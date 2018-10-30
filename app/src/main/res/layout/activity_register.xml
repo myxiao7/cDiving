@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/login_register_background"
+    >
+
+    <TextView
+        android:id="@+id/tvBack"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:drawableStart="@drawable/ic_close_white_24dp"
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="26dp"
+        >
+        <EditText
+            android:id="@+id/editEmail"
+            style="@style/common_edit_style"
+            android:hint="@string/email"
+            android:inputType="textEmailAddress"
+            />
+        <include
+            layout="@layout/include_divider_gray"/>
+        <EditText
+            android:id="@+id/editAccount"
+            style="@style/common_edit_style"
+            android:hint="@string/account"
+            />
+        <include
+            layout="@layout/include_divider_gray"/>
+        <EditText
+            android:id="@+id/editPassword"
+            style="@style/common_edit_style"
+            android:hint="@string/register_password_hint"
+            android:inputType="textPassword"
+            />
+        <include
+            layout="@layout/include_divider_gray"/>
+        <TextView
+            android:id="@+id/btnRegister"
+            style="@style/common_btn_style"
+            android:layout_marginTop="10dp"
+            android:text="@string/register"
+            />
+
+        <TextView
+            android:id="@+id/tvLogin"
+            style="@style/common_tv_style"
+            android:layout_marginTop="16dp"
+            android:text="@string/login_hint"
+            />
+
+        <TextView
+            android:id="@+id/tvCompany"
+            style="@style/common_tv_style"
+            android:layout_marginTop="16dp"
+            android:text="@string/company"
+            />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvConnectUs"
+        style="@style/common_tv_style"
+        android:text="@string/connect_us"
+        />
+</LinearLayout>
