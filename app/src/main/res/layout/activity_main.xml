@@ -45,17 +45,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#000000">
-
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white">
+            <include layout="@layout/layout_header_company"/>
+        </LinearLayout>
         <RelativeLayout
+            android:id="@+id/re"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
-            <com.yinglan.scrolllayout.content.ContentListView
-                android:id="@+id/list_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/white"/>
-
             <LinearLayout
                 android:id="@+id/linFoot"
                 android:orientation="vertical"

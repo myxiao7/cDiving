@@ -12,7 +12,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -39,7 +38,7 @@ import com.cdiving.cdiving.utils.ScreenUtil;
 import com.cdiving.cdiving.utils.ToastUtil;
 import com.cdiving.cdiving.utils.db.DbUtil;
 import com.yinglan.scrolllayout.ScrollLayout;
-import com.yinglan.scrolllayout.content.ContentListView;
+import com.yinglan.scrolllayout.content.ContentScrollView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,14 +70,14 @@ public class MainActivity extends BaseActivity {
     Button btnChat;
     @BindView(R.id.map)
     MapView map;
-    @BindView(R.id.list_view)
-    ContentListView listView;
     @BindView(R.id.linFoot)
     LinearLayout linFoot;
     @BindView(R.id.scroll_down_layout)
     ScrollLayout mScrollLayout;
     @BindView(R.id.root)
     RelativeLayout root;
+    @BindView(R.id.re)
+    RelativeLayout re;
 
     private AMap mAMap;
     private SharedPreferences sp;
@@ -142,12 +141,22 @@ public class MainActivity extends BaseActivity {
     }
 
     private void initView() {
-        listView.addHeaderView(LayoutInflater.from(activity).inflate(R.layout.layout_header_company, null));
+        /*listView.addHeaderView(LayoutInflater.from(activity).inflate(R.layout.layout_header_company, null));
         listView.setAdapter(new ListviewAdapter(this));
+        int w = View.MeasureSpec.makeMeasureSpec(0,
+                View.MeasureSpec.UNSPECIFIED);
+        int h = View.MeasureSpec.makeMeasureSpec(0,
+                View.MeasureSpec.UNSPECIFIED);
+        re.measure(w, h);
+        final int height = re.getMeasuredHeight();
+        int width = re.getMeasuredWidth();
+        ToastUtil.showLong("" + height + " " + width);*/
         /**设置 setting*/
         mScrollLayout.setMinOffset(ScreenUtil.dip2px(this, 48));
-        mScrollLayout.setMaxOffset((int) (ScreenUtil.getScreenHeight(this) * 0.5));
-        mScrollLayout.setExitOffset(ScreenUtil.dip2px(this, 50));
+//        mScrollLayout.setMaxOffset((int) (ScreenUtil.getScreenHeight(this) * 0.5));
+        mScrollLayout.setMaxOffset(ScreenUtil.dip2px(this, 200));
+
+        mScrollLayout.setExitOffset(ScreenUtil.dip2px(this, 48));
         mScrollLayout.setIsSupportExit(true);
         mScrollLayout.setAllowHorizontalScroll(true);
         mScrollLayout.setOnScrollChangedListener(mOnScrollChangedListener);
@@ -330,7 +339,7 @@ public class MainActivity extends BaseActivity {
              */
             @Override
             public void onSuccess(String userid) {
-                ToastUtil.showShort(token);
+//                ToastUtil.showShort(token);
                 editor.putString(SealConst.SEALTALK_LOGIN_ID, userid);
                 editor.commit();
                 SealUserInfoManager.getInstance().openDB();

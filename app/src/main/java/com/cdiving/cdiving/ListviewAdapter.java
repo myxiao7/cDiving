@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,7 +48,7 @@ public class ListviewAdapter extends BaseAdapter {
             viewholder = (ViewHolder) convertView.getTag();
         }
 
-        viewholder.textView.setText("测试" + position);
+//        viewholder.button.setText("测试" + position);
 
         convertView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,10 +61,10 @@ public class ListviewAdapter extends BaseAdapter {
     }
 
     static class ViewHolder {
-        TextView textView;
+        Button button;
 
         public ViewHolder(View view) {
-            textView = (TextView) view.findViewById(R.id.item_tv_2);
+            button = (Button) view.findViewById(R.id.btn);
         }
     }
 }
