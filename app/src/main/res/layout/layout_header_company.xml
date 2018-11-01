@@ -2,59 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <LinearLayout
-        android:id="@+id/linFoot"
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            >
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:background="@drawable/shape_rectangle_white_radius5"
-                >
-                <ImageView
-                    android:layout_width="46dp"
-                    android:layout_height="46dp"
-                    android:background="@mipmap/ic_chat"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/chats"
-                    />
-                <ImageView
-                    android:layout_width="46dp"
-                    android:layout_height="46dp"
-                    android:background="@mipmap/ic_contacts"
-                    />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/contact"
-                    />
+    android:layout_height="wrap_content"
+    android:background="@color/white3"
+    >
 
-            </LinearLayout>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content" />
-            <ImageView
-                android:layout_width="46dp"
-                android:layout_height="46dp"
-                android:background="@mipmap/ic_collection_normal"
-                />
-        </LinearLayout>
-
-    </LinearLayout>
     <LinearLayout
         style="@style/company_lin_style"
         >
@@ -63,11 +14,15 @@
             android:background="@mipmap/ic_home"
             />
         <TextView
+            android:id="@+id/tvCompanyName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:textSize="16sp"
+            android:background="@color/white3"
+            android:padding="5dp"
+            android:textSize="18sp"
             android:textStyle="bold"
+            android:singleLine="true"
+            android:ellipsize="end"
             android:text="广州市将达潜水疏浚有限公司"
             />
     </LinearLayout>
@@ -77,9 +32,10 @@
         >
         <ImageView
             style="@style/company_img_style"
-            android:drawableStart="@mipmap/ic_tel"
+            android:background="@mipmap/ic_tel"
             />
         <TextView
+            android:id="@+id/tvCompanyMobile"
             style="@style/company_tv_style"
             android:text="+86 18888888"
             />
@@ -89,9 +45,10 @@
         >
         <ImageView
             style="@style/company_img_style"
-            android:drawableStart="@mipmap/ic_email"
+            android:background="@mipmap/ic_email"
             />
         <TextView
+            android:id="@+id/tvCompanyEmail"
             style="@style/company_tv_style"
             android:text="82732131@163.com"
             />
@@ -104,6 +61,7 @@
             android:background="@mipmap/ic_location2"
             />
         <TextView
+            android:id="@+id/tvCompanyAddress"
             style="@style/company_tv_style"
             android:text="山东省青岛市苗岭路42号中韩街道办事处"
             />
@@ -116,8 +74,23 @@
             android:background="@mipmap/ic_website"
             />
         <TextView
+            android:id="@+id/tvCompanyWebSite"
             style="@style/company_tv_style"
             android:text="http://www.baidu.com"
             />
     </LinearLayout>
+    <TextView
+        android:id="@+id/btnChats"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:background="@drawable/shape_rectangle_blue_radius5"
+        android:text="@string/chats"
+        android:textSize="18sp"
+        android:textColor="@color/white"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"
+        />
+
 </LinearLayout>

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <declare-styleable name="SlideBottomLayout">
+        <attr name="handler_height" format="dimension"/>
+    </declare-styleable>
+
     <declare-styleable name="SwitchGroup">
         <attr name="orientation1">
             <flag name="horizontal" value="0"/>

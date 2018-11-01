@@ -43,8 +43,10 @@ public class TabActivity extends BaseActivity {
     private String[] titles;
     private ConversationListFragment mConversationListFragment = null;
     private Conversation.ConversationType[] mConversationsTypes = null;
-    public static void start(Context context) {
+    private int position = 0;
+    public static void start(Context context, int position) {
         Intent intent = new Intent(context, TabActivity.class);
+        intent.putExtra("position", position);
         context.startActivity(intent);
     }
 
@@ -54,6 +56,7 @@ public class TabActivity extends BaseActivity {
         setContentView(R.layout.activity_tab);
         ButterKnife.bind(this);
         isDebug = getSharedPreferences("config", MODE_PRIVATE).getBoolean("isDebug", false);
+        position = this.getIntent().getIntExtra("position", 0);
         titles = getResources().getStringArray(R.array.array_tab);
         fragments = new ArrayList<>();
         fragments.add(initConversationList());
@@ -61,6 +64,7 @@ public class TabActivity extends BaseActivity {
 
         viewPager.setAdapter(new MyAdapter(getSupportFragmentManager()));
         tabLayout.setupWithViewPager(viewPager);
+        viewPager.setCurrentItem(position);
 
     }
 

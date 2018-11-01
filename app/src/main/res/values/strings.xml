@@ -37,6 +37,7 @@
     <string name="chats">对话</string>
     <string name="contact">联系人</string>
 
+
     <string-array name="array_tab">
         <item>会话</item>
         <item>联系人</item>

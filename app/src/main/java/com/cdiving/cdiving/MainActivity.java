@@ -7,23 +7,29 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
+import com.amap.api.maps.CameraUpdate;
+import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
+import com.amap.api.maps.model.BitmapDescriptor;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
+import com.amap.api.maps.model.CameraPosition;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.cdiving.cdiving.base.BaseActivity;
+import com.cdiving.cdiving.entity.CompanyIndexInfo;
 import com.cdiving.cdiving.entity.CompanyInfo;
 import com.cdiving.cdiving.entity.CompanyResult;
 import com.cdiving.cdiving.entity.RongYunToken;
@@ -33,12 +39,11 @@ import com.cdiving.cdiving.im.SealUserInfoManager;
 import com.cdiving.cdiving.im.ui.activity.NewFriendListActivity;
 import com.cdiving.cdiving.login.LoginActivity;
 import com.cdiving.cdiving.rongyun.TabActivity;
+import com.cdiving.cdiving.ui.UserCenter;
 import com.cdiving.cdiving.utils.DialogUtil;
-import com.cdiving.cdiving.utils.ScreenUtil;
 import com.cdiving.cdiving.utils.ToastUtil;
 import com.cdiving.cdiving.utils.db.DbUtil;
-import com.yinglan.scrolllayout.ScrollLayout;
-import com.yinglan.scrolllayout.content.ContentScrollView;
+import com.cdiving.cdiving.views.SlideBottomLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,14 +75,48 @@ public class MainActivity extends BaseActivity {
     Button btnChat;
     @BindView(R.id.map)
     MapView map;
-    @BindView(R.id.linFoot)
-    LinearLayout linFoot;
-    @BindView(R.id.scroll_down_layout)
-    ScrollLayout mScrollLayout;
+    @BindView(R.id.ivChat)
+    ImageView ivChat;
+    @BindView(R.id.tvChat)
+    TextView tvChat;
+    @BindView(R.id.ivContacts)
+    ImageView ivContacts;
+    @BindView(R.id.tvContacts)
+    TextView tvContacts;
+    @BindView(R.id.ivCollection)
+    ImageView ivCollection;
+    @BindView(R.id.handle)
+    LinearLayout handle;
+    @BindView(R.id.tvCompanyName)
+    TextView tvCompanyName;
+    @BindView(R.id.tvCompanyMobile)
+    TextView tvCompanyMobile;
+    @BindView(R.id.tvCompanyEmail)
+    TextView tvCompanyEmail;
+    @BindView(R.id.tvCompanyAddress)
+    TextView tvCompanyAddress;
+    @BindView(R.id.tvCompanyWebSite)
+    TextView tvCompanyWebSite;
+    @BindView(R.id.slideLayout)
+    SlideBottomLayout slideLayout;
     @BindView(R.id.root)
     RelativeLayout root;
-    @BindView(R.id.re)
-    RelativeLayout re;
+    @BindView(R.id.btnChats)
+    TextView btnChats;
+    @BindView(R.id.tvUserCenter)
+    TextView tvUserCenter;
+    @BindView(R.id.rvTitle)
+    RelativeLayout rvTitle;
+    @BindView(R.id.ivChat2)
+    ImageView ivChat2;
+    @BindView(R.id.tvChat2)
+    TextView tvChat2;
+    @BindView(R.id.ivContacts2)
+    ImageView ivContacts2;
+    @BindView(R.id.tvContacts2)
+    TextView tvContacts2;
+    @BindView(R.id.linTitle)
+    LinearLayout linTitle;
 
     private AMap mAMap;
     private SharedPreferences sp;
@@ -86,39 +125,14 @@ public class MainActivity extends BaseActivity {
     private AMapLocationClientOption mLocationOption;
 
     private List<CompanyResult.CompanyAddress> list;
+    private Marker mSelectMarker;
+
+    private static final String TAG = "MainActivity";
 
     public static void start(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
         context.startActivity(intent);
     }
-
-    private ScrollLayout.OnScrollChangedListener mOnScrollChangedListener = new ScrollLayout.OnScrollChangedListener() {
-        @Override
-        public void onScrollProgressChanged(float currentProgress) {
-            if (currentProgress >= 0) {
-                float precent = 255 * currentProgress;
-                if (precent > 255) {
-                    precent = 255;
-                } else if (precent < 0) {
-                    precent = 0;
-                }
-                mScrollLayout.getBackground().setAlpha(255 - (int) precent);
-            }
-            if (linFoot.getVisibility() == View.VISIBLE)
-                linFoot.setVisibility(View.GONE);
-        }
-
-        @Override
-        public void onScrollFinished(ScrollLayout.Status currentStatus) {
-            if (currentStatus.equals(ScrollLayout.Status.EXIT)) {
-                linFoot.setVisibility(View.VISIBLE);
-            }
-        }
-
-        @Override
-        public void onChildScroll(int top) {
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,7 +141,6 @@ public class MainActivity extends BaseActivity {
         ButterKnife.bind(this);
         sp = getSharedPreferences("config", MODE_PRIVATE);
         editor = sp.edit();
-        initView();
         getCompanyList();
         getRongYunToken();
         initLocation();
@@ -138,44 +151,33 @@ public class MainActivity extends BaseActivity {
         if (mAMap == null) {
             mAMap = mMapView.getMap();
         }
+        mAMap.setOnMarkerClickListener(new AMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                final CompanyResult.CompanyAddress companyAddress = (CompanyResult.CompanyAddress) marker.getObject();
+                if(mSelectMarker != null){
+                    final CompanyResult.CompanyAddress mSelectAddress = (CompanyResult.CompanyAddress) mSelectMarker.getObject();
+                    if(!companyAddress.getLatitude().equals(mSelectAddress.getLatitude()) && !companyAddress.getLongitude().equals(mSelectAddress.getLongitude())){
+                        marker.setIcon(createMarkerIconNor(true));
+                        mSelectMarker.setIcon(createMarkerIconNor(false));
+                    }
+                }else{
+                    marker.setIcon(createMarkerIconNor(true));
+                }
+                //                marker.showInfoWindow();
+                mSelectMarker = marker;
+                linTitle.setVisibility(View.GONE);
+                slideLayout.setVisibility(View.VISIBLE);
+                ToastUtil.showLong("" + companyAddress.getUid());
+                getCompanyInfo(companyAddress.getUid());
+
+                return true;
+            }
+        });
     }
 
     private void initView() {
-        /*listView.addHeaderView(LayoutInflater.from(activity).inflate(R.layout.layout_header_company, null));
-        listView.setAdapter(new ListviewAdapter(this));
-        int w = View.MeasureSpec.makeMeasureSpec(0,
-                View.MeasureSpec.UNSPECIFIED);
-        int h = View.MeasureSpec.makeMeasureSpec(0,
-                View.MeasureSpec.UNSPECIFIED);
-        re.measure(w, h);
-        final int height = re.getMeasuredHeight();
-        int width = re.getMeasuredWidth();
-        ToastUtil.showLong("" + height + " " + width);*/
-        /**设置 setting*/
-        mScrollLayout.setMinOffset(ScreenUtil.dip2px(this, 48));
-//        mScrollLayout.setMaxOffset((int) (ScreenUtil.getScreenHeight(this) * 0.5));
-        mScrollLayout.setMaxOffset(ScreenUtil.dip2px(this, 200));
 
-        mScrollLayout.setExitOffset(ScreenUtil.dip2px(this, 48));
-        mScrollLayout.setIsSupportExit(true);
-        mScrollLayout.setAllowHorizontalScroll(true);
-        mScrollLayout.setOnScrollChangedListener(mOnScrollChangedListener);
-        mScrollLayout.setToExit();
-
-        mScrollLayout.getBackground().setAlpha(0);
-        root.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mScrollLayout.scrollToExit();
-            }
-        });
-
-        linFoot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mScrollLayout.setToOpen();
-            }
-        });
     }
 
     protected void initData() {
@@ -271,6 +273,10 @@ public class MainActivity extends BaseActivity {
             public void onLocationChanged(final AMapLocation aMapLocation) {
                 if (aMapLocation != null) {
                     if (aMapLocation.getErrorCode() == 0) {
+                        CameraUpdate mCameraUpdate = CameraUpdateFactory.newCameraPosition(new
+                                CameraPosition(new LatLng(aMapLocation.getLatitude(), aMapLocation.getLongitude()
+                        ), 3, 0, 0));
+                        mAMap.moveCamera(mCameraUpdate);
 //                        ToastUtil.showShort(aMapLocation.getCity());
                     } else {
 //                        ToastUtil.showShort(aMapLocation.getErrorCode() + aMapLocation.getErrorInfo());
@@ -407,6 +413,7 @@ public class MainActivity extends BaseActivity {
                     @Override
                     public void onNext(CompanyResult companyResult) {
                         if (companyResult.getStatus() == 1) {
+                            mAMap.clear();
                             list = new ArrayList<>();
                             list.addAll(companyResult.getResults());
                             for (CompanyResult.CompanyAddress address : list) {
@@ -414,15 +421,11 @@ public class MainActivity extends BaseActivity {
                                 markerOption.position(new LatLng(Double.valueOf(address
                                         .getLatitude()),
                                         Double.valueOf(address.getLongitude())));
-                                markerOption.title("");
+                                /*markerOption.title("");
                                 markerOption.anchor(0.5f, 0.81f);//设置锚点
-                                markerOption.infoWindowEnable(true);
+                                markerOption.infoWindowEnable(false);*/
 
-                                markerOption.icon(BitmapDescriptorFactory.fromBitmap
-                                        (BitmapFactory.decodeResource
-                                                (getResources(), R
-                                                        .mipmap
-                                                        .ic_location)));
+                                markerOption.icon(createMarkerIconNor(false));
                                 Marker addMarker = mAMap.addMarker(markerOption);
                                 addMarker.setObject(address);
                             }
@@ -439,6 +442,65 @@ public class MainActivity extends BaseActivity {
 
                     }
                 });
+    }
+
+    private void getCompanyInfo(final int userId) {
+        RetrofitFactory.getUserApi()
+                .getCompanyInfo(String.valueOf(userId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<CompanyIndexInfo>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                    }
+
+                    @Override
+                    public void onNext(CompanyIndexInfo companyIndexInfo) {
+                        if (companyIndexInfo.getStatus() == 1) {
+                            CompanyIndexInfo.ResultsBean resultsBean = companyIndexInfo.getResults().get(0);
+                            tvCompanyName.setText(resultsBean.getUname());
+                            tvCompanyMobile.setText(resultsBean.getTel());
+                            tvCompanyEmail.setText(resultsBean.getEmail());
+                            tvCompanyAddress.setText(resultsBean.getAddress());
+                            tvCompanyWebSite.setText(resultsBean.getWebSite());
+                            if (!slideLayout.arriveTop()) {
+                                slideLayout.show();
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    /**
+     * Marker图标
+     * @param selector
+     * @return
+     */
+    private BitmapDescriptor createMarkerIconNor(boolean selector) {
+        if (selector) {
+            return BitmapDescriptorFactory.fromBitmap
+                    (BitmapFactory.decodeResource
+                            (getResources(), R
+                                    .mipmap
+                                    .ic_location_selector));
+        } else {
+            return BitmapDescriptorFactory.fromBitmap
+                    (BitmapFactory.decodeResource
+                            (getResources(), R
+                                    .mipmap
+                                    .ic_location_normal));
+        }
     }
 
     @Override
@@ -486,18 +548,68 @@ public class MainActivity extends BaseActivity {
         mMapView.onSaveInstanceState(outState);
     }
 
-    @OnClick({R.id.btnLogin, R.id.btnTab, R.id.btnChat})
+
+    @OnClick({R.id.btnLogin, R.id.btnTab, R.id.btnChat, R.id.ivChat2, R.id.tvChat2, R.id.ivContacts2, R.id.tvContacts2, R.id.ivChat, R.id.tvChat, R.id.ivContacts, R.id.tvContacts, R.id.ivCollection, R.id.tvCompanyMobile, R.id.tvCompanyEmail, R.id.btnChats, R.id.tvUserCenter})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btnLogin:
                 LoginActivity.start(activity);
                 break;
             case R.id.btnTab:
-                TabActivity.start(activity);
+//                TabActivity.start(activity);
                 break;
             case R.id.btnChat:
                 RongIM.getInstance().startPrivateChat(activity, "628", "标题");
                 break;
+            case R.id.ivChat2:
+                startChatOrContact(0);
+                break;
+            case R.id.tvChat2:
+                startChatOrContact(0);
+                break;
+            case R.id.ivContacts2:
+                startChatOrContact(1);
+                break;
+            case R.id.tvContacts2:
+                startChatOrContact(1);
+                break;
+            case R.id.ivChat:
+                startChatOrContact(0);
+                break;
+            case R.id.tvChat:
+                startChatOrContact(0);
+                break;
+            case R.id.ivContacts:
+                startChatOrContact(1);
+                break;
+            case R.id.tvContacts:
+                startChatOrContact(1);
+                break;
+            case R.id.ivCollection:
+                break;
+
+            case R.id.tvCompanyMobile:
+                ToastUtil.showShort("call");
+                break;
+            case R.id.tvCompanyEmail:
+                ToastUtil.showShort("eMail");
+                break;
+
+            case R.id.btnChats:
+                final CompanyResult.CompanyAddress companyAddress = (CompanyResult.CompanyAddress) mSelectMarker.getObject();
+                RongIM.getInstance().startPrivateChat(activity, String.valueOf(companyAddress.getUid()), "标题");
+                break;
+            case R.id.tvUserCenter:
+                UserCenter.start(activity);
+                break;
+        }
+    }
+
+    private void startChatOrContact(int type) {
+        if (DbUtil.getUserInfo().getIsLogin()) {
+            TabActivity.start(activity, type);
+        } else {
+            LoginActivity.start(activity);
         }
     }
 }

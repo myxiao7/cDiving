@@ -1,5 +1,6 @@
 package com.cdiving.cdiving.http.api;
 
+import com.cdiving.cdiving.entity.CompanyIndexInfo;
 import com.cdiving.cdiving.entity.CompanyInfo;
 import com.cdiving.cdiving.entity.CompanyResult;
 import com.cdiving.cdiving.entity.RegisterStatus;
@@ -11,6 +12,8 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * @author zhanghao
@@ -65,7 +68,7 @@ public interface UserApi {
                                              @Field("userName") String userName, @Field("userId") String userId);
 
     /**
-     * 获取个人信息（包括商家信息）
+     * 获取个人信息（包括联系人商家信息）
      * @param act register_email
      * @param app api
      * @param mod Oauth
@@ -82,11 +85,18 @@ public interface UserApi {
 
 
     /**
-     * 获取首页公司信息
+     * 获取首页公司列表
      * @return
      */
     @GET("public/api/serviceProviderList")
     Observable<CompanyResult> getCompanyAddress();
+
+    /**
+     * 获取首页公司信息
+     * @return
+     */
+    @GET("public/api/serviceProviderInfo")
+    Observable<CompanyIndexInfo> getCompanyInfo(@Query("uid") String userId);
 }
 
 

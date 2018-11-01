@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray_cc"
+    >
+
+    <include layout="@layout/include_title"/>
+    <include layout="@layout/include_divider_gray"/>
+
+    <include layout="@layout/include_divider_gray"
+        />
+    <LinearLayout
+        style="@style/user_center_lin_style"
+        >
+        <TextView
+           style="@style/user_center_tv_style"
+            android:text="@string/portrait"
+            />
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@mipmap/ic_home"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:drawableEnd="@drawable/ic_right_gray_24dp"
+            />
+    </LinearLayout>
+    <include layout="@layout/include_divider_gray"/>
+
+    <LinearLayout
+        style="@style/user_center_lin_style"
+        >
+        <TextView
+            style="@style/user_center_tv_style"
+            android:text="@string/account"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            />
+    </LinearLayout>
+    <LinearLayout
+        style="@style/user_center_lin_style"
+        >
+        <TextView
+            style="@style/user_center_tv_style"
+            android:text="@string/email"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/user_center_lin_style"
+        >
+        <TextView
+            style="@style/user_center_tv_style"
+            android:text="@string/contact"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:drawableEnd="@drawable/ic_right_gray_24dp"
+            />
+    </LinearLayout>
+
+</LinearLayout>

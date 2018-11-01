@@ -3,6 +3,7 @@ package com.cdiving.cdiving.entity;
 import java.util.List;
 
 /**
+ * 首页公司列列表
  * @author zhanghao
  * @date 2018-10-27.
  */
