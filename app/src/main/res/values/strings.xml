@@ -14,6 +14,8 @@
     <string name="account_email"><font size="14">电子邮箱&#160;&#160;或&#160;&#160;用户名</font></string>
     <string name="register_hint">没有账号？去注册</string>
     <string name="connect_us">联系我们</string>
+    <string name="logout">退出登录</string>
+    <string name="setting">设置</string>
 
     <string name="login_account_hint"><font size="14">请输入用户名或电子邮箱</font></string>
     <string name="login_password_hint"><font size="14">请输入密码</font></string>
@@ -42,7 +44,9 @@
         <item>会话</item>
         <item>联系人</item>
     </string-array>
-
+    
+    <string name="splash_describe">Almost all commercial diving companies can be found here</string>
+    <string name="splash_copy_right">JiaEnTech © 2018 All Rights Reserved</string>
 
     <!--主页-->
     <string name="main_name">融云</string>

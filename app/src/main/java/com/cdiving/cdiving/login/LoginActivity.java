@@ -71,6 +71,7 @@ public class LoginActivity extends BaseActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tvBack:
+                finish();
                 break;
             case R.id.btnLogin:
                 login();

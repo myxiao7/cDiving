@@ -10,6 +10,11 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="AppTheme.splash" parent="AppTheme">
+        <!--<item name="android:windowBackground">@drawable/splash</item>-->
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
 
     <style name="common_edit_style">
         <item name="android:layout_height">wrap_content</item>

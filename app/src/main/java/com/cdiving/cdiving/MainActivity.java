@@ -29,17 +29,19 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.cdiving.cdiving.base.BaseActivity;
+import com.cdiving.cdiving.entity.CompanyAddress;
 import com.cdiving.cdiving.entity.CompanyIndexInfo;
 import com.cdiving.cdiving.entity.CompanyInfo;
 import com.cdiving.cdiving.entity.CompanyResult;
 import com.cdiving.cdiving.entity.RongYunToken;
+import com.cdiving.cdiving.entity.UserInfo;
 import com.cdiving.cdiving.http.RetrofitFactory;
 import com.cdiving.cdiving.im.SealConst;
 import com.cdiving.cdiving.im.SealUserInfoManager;
 import com.cdiving.cdiving.im.ui.activity.NewFriendListActivity;
 import com.cdiving.cdiving.login.LoginActivity;
 import com.cdiving.cdiving.rongyun.TabActivity;
-import com.cdiving.cdiving.ui.UserCenter;
+import com.cdiving.cdiving.ui.UserCenterActivity;
 import com.cdiving.cdiving.utils.DialogUtil;
 import com.cdiving.cdiving.utils.ToastUtil;
 import com.cdiving.cdiving.utils.db.DbUtil;
@@ -47,18 +49,20 @@ import com.cdiving.cdiving.views.SlideBottomLayout;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import io.rong.imkit.RongIM;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.model.Conversation;
-import io.rong.imlib.model.UserInfo;
 import io.rong.message.ContactNotificationMessage;
 
 /**
@@ -124,7 +128,7 @@ public class MainActivity extends BaseActivity {
     private AMapLocationClient mLocationClient;
     private AMapLocationClientOption mLocationOption;
 
-    private List<CompanyResult.CompanyAddress> list;
+    private List<CompanyAddress> list;
     private Marker mSelectMarker;
 
     private static final String TAG = "MainActivity";
@@ -141,22 +145,25 @@ public class MainActivity extends BaseActivity {
         ButterKnife.bind(this);
         sp = getSharedPreferences("config", MODE_PRIVATE);
         editor = sp.edit();
-        getCompanyList();
+        if(!DbUtil.getUserInfo().getIsLogin()){
+            LoginActivity.start(activity);
+        }
         getRongYunToken();
-        initLocation();
         //获取地图控件引用
         mMapView = findViewById(R.id.map);
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，创建地图
         mMapView.onCreate(savedInstanceState);
         if (mAMap == null) {
             mAMap = mMapView.getMap();
+            initLocation();
         }
+        getCompanyList();
         mAMap.setOnMarkerClickListener(new AMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                final CompanyResult.CompanyAddress companyAddress = (CompanyResult.CompanyAddress) marker.getObject();
+                final CompanyAddress companyAddress = (CompanyAddress) marker.getObject();
                 if(mSelectMarker != null){
-                    final CompanyResult.CompanyAddress mSelectAddress = (CompanyResult.CompanyAddress) mSelectMarker.getObject();
+                    final CompanyAddress mSelectAddress = (CompanyAddress) mSelectMarker.getObject();
                     if(!companyAddress.getLatitude().equals(mSelectAddress.getLatitude()) && !companyAddress.getLongitude().equals(mSelectAddress.getLongitude())){
                         marker.setIcon(createMarkerIconNor(true));
                         mSelectMarker.setIcon(createMarkerIconNor(false));
@@ -377,13 +384,20 @@ public class MainActivity extends BaseActivity {
                     }
 
                     @Override
-                    public void onNext(CompanyInfo userInfo) {
-                        String nickName = userInfo.getUname();
-                        String portraitUri = userInfo.getAvatar_middle();
+                    public void onNext(CompanyInfo companyInfo) {
+                        String nickName = companyInfo.getUname();
+                        String portraitUri = companyInfo.getAvatar_middle();
+                        String email = companyInfo.getEmail();
+                        UserInfo userInfo = DbUtil.getUserInfo();
+                        userInfo.setUname(nickName);
+                        userInfo.setEmail(email);
+                        userInfo.setPortrait(portraitUri);
+                        DbUtil.updateUserInfo(userInfo);
+
                         editor.putString(SealConst.SEALTALK_LOGIN_NAME, nickName);
                         editor.putString(SealConst.SEALTALK_LOGING_PORTRAIT, portraitUri);
                         editor.commit();
-                        RongIM.getInstance().refreshUserInfoCache(new UserInfo(userId, nickName, Uri.parse(portraitUri)));
+                        RongIM.getInstance().refreshUserInfoCache(new io.rong.imlib.model.UserInfo(userId, nickName, Uri.parse(portraitUri)));
                         //不继续在login界面同步好友,群组,群组成员信息
                         SealUserInfoManager.getInstance().getAllUserInfo();
                     }
@@ -416,7 +430,8 @@ public class MainActivity extends BaseActivity {
                             mAMap.clear();
                             list = new ArrayList<>();
                             list.addAll(companyResult.getResults());
-                            for (CompanyResult.CompanyAddress address : list) {
+                            DbUtil.insertCompanyList(list);
+                            for (CompanyAddress address : list) {
                                 MarkerOptions markerOption = new MarkerOptions();
                                 markerOption.position(new LatLng(Double.valueOf(address
                                         .getLatitude()),
@@ -444,9 +459,9 @@ public class MainActivity extends BaseActivity {
                 });
     }
 
-    private void getCompanyInfo(final int userId) {
+    private void getCompanyInfo(String userId) {
         RetrofitFactory.getUserApi()
-                .getCompanyInfo(String.valueOf(userId))
+                .getCompanyInfo(userId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<CompanyIndexInfo>() {
@@ -596,11 +611,11 @@ public class MainActivity extends BaseActivity {
                 break;
 
             case R.id.btnChats:
-                final CompanyResult.CompanyAddress companyAddress = (CompanyResult.CompanyAddress) mSelectMarker.getObject();
-                RongIM.getInstance().startPrivateChat(activity, String.valueOf(companyAddress.getUid()), "标题");
+                final CompanyAddress companyAddress = (CompanyAddress) mSelectMarker.getObject();
+                RongIM.getInstance().startPrivateChat(activity, companyAddress.getUid(), "标题");
                 break;
             case R.id.tvUserCenter:
-                UserCenter.start(activity);
+                UserCenterActivity.start(activity);
                 break;
         }
     }

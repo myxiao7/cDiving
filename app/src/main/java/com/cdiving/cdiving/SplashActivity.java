@@ -32,6 +32,7 @@ public class SplashActivity extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_splash2);
         if (DbUtil.getUserInfo() == null) {
             DbUtil.createEmptyUser();
         }
@@ -45,13 +46,13 @@ public class SplashActivity extends BaseActivity {
                     public void accept(Boolean granted) throws Exception {
                         if (granted) {
                             long timeLeft = System.currentTimeMillis() - startTime;
-                            if (timeLeft > 0 && timeLeft < 800) {
+                            if (timeLeft > 0 && timeLeft < 500) {
                                 handler.postDelayed(new Runnable() {
                                     @Override
                                     public void run() {
                                         gotoMain();
                                     }
-                                }, 800 - timeLeft);
+                                }, 500 - timeLeft);
                             }else{
                                 gotoMain();
                             }

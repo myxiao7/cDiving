@@ -19,19 +19,24 @@ public class UserInfo {
 
     private String uid;
     private String uname;
+    private String email;
+    private String portrait;
 
     private String oauth_token;
 
     private String oauth_token_secret;
     private boolean isLogin;
-    @Generated(hash = 587860431)
+    @Generated(hash = 33299582)
     public UserInfo(Long ids, int code, String message, String uid, String uname,
-            String oauth_token, String oauth_token_secret, boolean isLogin) {
+            String email, String portrait, String oauth_token,
+            String oauth_token_secret, boolean isLogin) {
         this.ids = ids;
         this.code = code;
         this.message = message;
         this.uid = uid;
         this.uname = uname;
+        this.email = email;
+        this.portrait = portrait;
         this.oauth_token = oauth_token;
         this.oauth_token_secret = oauth_token_secret;
         this.isLogin = isLogin;
@@ -68,6 +73,18 @@ public class UserInfo {
     }
     public void setUname(String uname) {
         this.uname = uname;
+    }
+    public String getEmail() {
+        return this.email;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    public String getPortrait() {
+        return this.portrait;
+    }
+    public void setPortrait(String portrait) {
+        this.portrait = portrait;
     }
     public String getOauth_token() {
         return this.oauth_token;
