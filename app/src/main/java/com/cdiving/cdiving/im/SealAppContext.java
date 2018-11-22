@@ -31,6 +31,10 @@ import com.cdiving.cdiving.im.ui.activity.LoginActivity;
 import com.cdiving.cdiving.im.ui.activity.MainActivity;
 import com.cdiving.cdiving.im.ui.activity.NewFriendListActivity;
 import com.cdiving.cdiving.im.ui.activity.UserDetailActivity;
+import com.cdiving.cdiving.ui.DatumActivity;
+import com.cdiving.cdiving.utils.ToastUtil;
+import com.cdiving.cdiving.utils.db.DbUtil;
+
 import io.rong.calllib.RongCallClient;
 import io.rong.calllib.RongCallSession;
 import io.rong.imkit.DefaultExtensionModule;
@@ -413,12 +417,18 @@ public class SealAppContext implements RongIM.ConversationListBehaviorListener,
         }
         //开发测试时,发送系统消息的userInfo只有id不为空
         if (userInfo != null && userInfo.getName() != null && userInfo.getPortraitUri() != null) {
-            Intent intent = new Intent(context, UserDetailActivity.class);
+            if(userInfo.getUserId().equals(DbUtil.getUserInfo().getUid())){
+
+            }else{
+                DatumActivity.start(context, userInfo.getUserId());
+            }
+          /*  Intent intent = new Intent(context, UserDetailActivity.class);
             intent.putExtra("conversationType", conversationType.getValue());
             Friend friend = CharacterParser.getInstance().generateFriendFromUserInfo(userInfo);
             intent.putExtra("friend", friend);
             intent.putExtra("type", CLICK_CONVERSATION_USER_PORTRAIT);
-            context.startActivity(intent);
+            context.startActivity(intent);*/
+
         }
         return true;
     }

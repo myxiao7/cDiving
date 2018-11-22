@@ -400,6 +400,10 @@
         "source": "E:\\WorkSpace\\cDiving\\IMKit\\build\\intermediates\\bundles\\debug\\res\\drawable-xhdpi-v4\\rc_ic_checkbox_none.png"
     },
     {
+        "merged": "E:\\WorkSpace\\cDiving\\recognizer\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xhdpi-v4_ic_default.jpg.flat",
+        "source": "E:\\WorkSpace\\cDiving\\IMKit\\build\\intermediates\\bundles\\debug\\res\\drawable-xhdpi-v4\\ic_default.jpg"
+    },
+    {
         "merged": "E:\\WorkSpace\\cDiving\\recognizer\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xhdpi-v4_rc_default_group_portrait.png.flat",
         "source": "E:\\WorkSpace\\cDiving\\IMKit\\build\\intermediates\\bundles\\debug\\res\\drawable-xhdpi-v4\\rc_default_group_portrait.png"
     },

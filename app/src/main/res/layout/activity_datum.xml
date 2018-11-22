@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+    <include layout="@layout/include_title"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <com.amap.api.maps.MapView
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white3"
+            android:padding="10dp"
+            >
+
+            <LinearLayout
+                style="@style/company_lin_style"
+                >
+                <ImageView
+                    style="@style/company_img_style"
+                    android:background="@mipmap/ic_home"
+                    />
+                <TextView
+                    android:id="@+id/tvCompanyName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/white3"
+                    android:padding="5dp"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:text="广州市将达潜水疏浚有限公司"
+                    />
+            </LinearLayout>
+
+            <LinearLayout
+                style="@style/company_lin_style"
+                >
+                <ImageView
+                    style="@style/company_img_style"
+                    android:background="@mipmap/ic_tel"
+                    />
+                <TextView
+                    android:id="@+id/tvCompanyMobile"
+                    style="@style/company_tv_style"
+                    android:text="+86 18888888"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                style="@style/company_lin_style"
+                >
+                <ImageView
+                    style="@style/company_img_style"
+                    android:background="@mipmap/ic_email"
+                    />
+                <TextView
+                    android:id="@+id/tvCompanyEmail"
+                    style="@style/company_tv_style"
+                    android:text="82732131@163.com"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                style="@style/company_lin_style"
+                >
+                <ImageView
+                    style="@style/company_img_style"
+                    android:background="@mipmap/ic_location2"
+                    />
+                <TextView
+                    android:id="@+id/tvCompanyAddress"
+                    style="@style/company_tv_style"
+                    android:text="山东省青岛市苗岭路42号中韩街道办事处"
+                    />
+            </LinearLayout>
+            <LinearLayout
+                style="@style/company_lin_style"
+                >
+                <ImageView
+                    style="@style/company_img_style"
+                    android:background="@mipmap/ic_website"
+                    />
+                <TextView
+                    android:id="@+id/tvCompanyWebSite"
+                    style="@style/company_tv_style"
+                    android:text="http://www.baidu.com"
+                    />
+            </LinearLayout>
+            <TextView
+                android:id="@+id/btnChats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:background="@drawable/shape_rectangle_blue_radius5"
+                android:text="@string/chats"
+                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:gravity="center"
+                />
+        </LinearLayout>
+    </FrameLayout>
+
+</LinearLayout>

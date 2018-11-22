@@ -644,6 +644,10 @@
         "source": "E:\\WorkSpace\\cDiving\\IMKit\\build\\intermediates\\bundles\\debug\\res\\drawable-xhdpi-v4\\rc_voice_unread.png"
     },
     {
+        "merged": "E:\\WorkSpace\\cDiving\\contactcard\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xhdpi-v4_ic_default.jpg.flat",
+        "source": "E:\\WorkSpace\\cDiving\\IMKit\\build\\intermediates\\bundles\\debug\\res\\drawable-xhdpi-v4\\ic_default.jpg"
+    },
+    {
         "merged": "E:\\WorkSpace\\cDiving\\contactcard\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout_rc_item_app_service_conversation.xml.flat",
         "source": "E:\\WorkSpace\\cDiving\\IMKit\\build\\intermediates\\bundles\\debug\\res\\layout\\rc_item_app_service_conversation.xml"
     },

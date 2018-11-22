@@ -60,7 +60,7 @@ public class TabActivity extends BaseActivity {
         titles = getResources().getStringArray(R.array.array_tab);
         fragments = new ArrayList<>();
         fragments.add(initConversationList());
-//        fragments.add(initConversationList());
+        fragments.add(FollowFragment.newInstance());
 
         viewPager.setAdapter(new MyAdapter(getSupportFragmentManager()));
         tabLayout.setupWithViewPager(viewPager);

@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">cDiving</string>
 
+    <string name="app_web">service@cdiving.com</string>
+
     <string name="permission_need">cDiving 需要%1$s权限，是否去设置？</string>
     <string name="permission_audio">录制音频</string>
     <string name="permission_camera">拍摄照片</string>
@@ -38,11 +40,28 @@
 
     <string name="chats">对话</string>
     <string name="contact">联系人</string>
+    <string name="datum">资料</string>
+    <string name="back">返回</string>
 
 
     <string-array name="array_tab">
         <item>会话</item>
         <item>联系人</item>
+    </string-array>
+
+    <string-array name="login_tab">
+        <item>登录</item>
+        <item>联系我们</item>
+        <item>取消</item>
+    </string-array>
+
+    <string name="contact_title">对方暂时未在线，您可以通过以下其他方式联系：</string>
+    <string name="call">打电话</string>
+    <string name="call_hint">请输入电话号码</string>
+    <string-array name="contact_tab">
+        <item>打电话</item>
+        <item>电子邮箱</item>
+        <item>取消</item>
     </string-array>
     
     <string name="splash_describe">Almost all commercial diving companies can be found here</string>

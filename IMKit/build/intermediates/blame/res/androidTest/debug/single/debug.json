@@ -512,6 +512,10 @@
         "source": "E:\\WorkSpace\\cDiving\\IMKit\\build\\intermediates\\bundles\\debug\\res\\drawable-xhdpi-v4\\u1f60e.png"
     },
     {
+        "merged": "E:\\WorkSpace\\cDiving\\IMKit\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xhdpi-v4_ic_default.jpg.flat",
+        "source": "E:\\WorkSpace\\cDiving\\IMKit\\build\\intermediates\\bundles\\debug\\res\\drawable-xhdpi-v4\\ic_default.jpg"
+    },
+    {
         "merged": "E:\\WorkSpace\\cDiving\\IMKit\\build\\intermediates\\res\\merged\\androidTest\\debug\\layout_notification_media_action.xml.flat",
         "source": "C:\\Users\\Administrator\\.gradle\\caches\\transforms-1\\files-1.1\\support-media-compat-26.0.0.aar\\a6d5dae1287791c5c1dd10a2c40ee671\\res\\layout\\notification_media_action.xml"
     },

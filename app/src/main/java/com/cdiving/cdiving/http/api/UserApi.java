@@ -3,9 +3,12 @@ package com.cdiving.cdiving.http.api;
 import com.cdiving.cdiving.entity.CompanyIndexInfo;
 import com.cdiving.cdiving.entity.CompanyInfo;
 import com.cdiving.cdiving.entity.CompanyResult;
+import com.cdiving.cdiving.entity.Follow;
 import com.cdiving.cdiving.entity.RegisterStatus;
 import com.cdiving.cdiving.entity.RongYunToken;
 import com.cdiving.cdiving.entity.UserInfo;
+
+import java.util.List;
 
 import io.reactivex.Observable;
 import retrofit2.http.Field;
@@ -83,6 +86,21 @@ public interface UserApi {
                                         @Field("oauth_token") String oauthToken, @Field("oauth_token_secret") String secret,
                                         @Field("user_id") String userId);
 
+    /**
+     * 获取收藏列表
+     * @param act user_following
+     * @param app api
+     * @param mod User
+     * @param oauthToken Oauth
+     * @param secret secret
+     * @param userId id
+     * @return
+     */
+    @FormUrlEncoded
+    @POST("social/index.php?")
+    Observable<List<Follow>> getFollowList(@Field("act") String act, @Field("app") String app, @Field("mod") String mod,
+                                          @Field("oauth_token") String oauthToken, @Field("oauth_token_secret") String secret,
+                                          @Field("user_id") String userId);
 
     /**
      * 获取首页公司列表
@@ -92,7 +110,7 @@ public interface UserApi {
     Observable<CompanyResult> getCompanyAddress();
 
     /**
-     * 获取首页公司信息
+     * 获取首页公司详情
      * @return
      */
     @GET("public/api/serviceProviderInfo")

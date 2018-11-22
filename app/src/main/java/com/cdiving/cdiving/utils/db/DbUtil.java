@@ -3,10 +3,14 @@ package com.cdiving.cdiving.utils.db;
 import com.cdiving.cdiving.base.BaseApplication;
 import com.cdiving.cdiving.entity.CompanyAddress;
 import com.cdiving.cdiving.entity.CompanyAddressDao;
+import com.cdiving.cdiving.entity.CompanyDetail;
+import com.cdiving.cdiving.entity.CompanyDetailDao;
 import com.cdiving.cdiving.entity.CompanyInfo;
 import com.cdiving.cdiving.entity.CompanyInfoDao;
 import com.cdiving.cdiving.entity.CompanyResult;
 import com.cdiving.cdiving.entity.DaoSession;
+import com.cdiving.cdiving.entity.Follow;
+import com.cdiving.cdiving.entity.FollowDao;
 import com.cdiving.cdiving.entity.UserInfo;
 
 import java.util.ArrayList;
@@ -84,43 +88,101 @@ public class DbUtil {
     /**
      * 获取首页公司列表
      */
-    public static List<CompanyAddress> getcompanyAddresses(){
+    public static List<CompanyAddress> getCompanyAddresses(){
         return daoSession.getCompanyAddressDao().queryBuilder().orderAsc(CompanyAddressDao.Properties.Ids).build().list();
     }
 
     /**
-     * 新建或更新公司信息
+     * 新建或更新公司详情(未登录)
+     * @param companyDetail
+     */
+    public static void UpdateCompanyDetail(CompanyDetail companyDetail, String userId){
+        CompanyDetail detail = getCompanyDetail(userId);
+        if(detail == null){
+            companyDetail.setUid(userId);
+            daoSession.getCompanyDetailDao().insert(companyDetail);
+        }else{
+            detail.setUid(userId);
+            detail.setUname(companyDetail.getUname());
+            detail.setEmail(companyDetail.getEmail());
+            detail.setTel(companyDetail.getTel());
+            detail.setWebSite(companyDetail.getWebSite());
+            detail.setAddress(companyDetail.getAddress());
+            detail.setIs_member(companyDetail.getIs_member());
+            daoSession.getCompanyDetailDao().update(detail);
+        }
+    }
+
+    /**
+     * 获取公司详情(未登录)
+     * @return
+     */
+    public static CompanyDetail getCompanyDetail(String userId){
+        List<CompanyDetail> companyDetails = new ArrayList<>();
+        companyDetails = daoSession.getCompanyDetailDao().queryBuilder().where(CompanyDetailDao.Properties.Uid.eq(userId)).list();
+        if(companyDetails.size()>0){
+            return companyDetails.get(0);
+        }
+        return null;
+    }
+
+    /**
+     * 新建或更新公司详情(登录)
      * @param companyInfo
      */
-    public static void UpdateCompanyInfo(CompanyInfo companyInfo, String userId){
-        CompanyInfo info = getCompanyInfo(userId);
+    public static void UpdateCompanyDetail2(CompanyInfo companyInfo, String userId){
+        CompanyInfo info = getCompanyDetail2(userId);
         if(info == null){
-            daoSession.insert(companyInfo);
+            companyInfo.setUid(userId);
+            daoSession.getCompanyInfoDao().insert(companyInfo);
         }else{
-            info.setUid(companyInfo.getUid());
+            info.setUid(userId);
             info.setUname(companyInfo.getUname());
             info.setEmail(companyInfo.getEmail());
             info.setTel(companyInfo.getTel());
             info.setWebsite(companyInfo.getWebsite());
-            info.setAvatar_middle(companyInfo.getAvatar_middle());
-            info.setLang(companyInfo.getLang());
-            info.setLatitude(companyInfo.getLatitude());
-            info.setIs_service_provider(companyInfo.getIs_service_provider());
+            info.setAddress(companyInfo.getAddress());
             info.setIs_member(companyInfo.getIs_member());
+            info.setIs_follow(companyInfo.getIs_follow());
             daoSession.getCompanyInfoDao().update(info);
         }
     }
 
     /**
-     * 获取公司信息
+     * 获取公司详情(登录)
      * @return
      */
-    public static CompanyInfo getCompanyInfo(String userId){
+    public static CompanyInfo getCompanyDetail2(String userId){
         List<CompanyInfo> companyInfos = new ArrayList<>();
         companyInfos = daoSession.getCompanyInfoDao().queryBuilder().where(CompanyInfoDao.Properties.Uid.eq(userId)).list();
         if(companyInfos.size()>0){
             return companyInfos.get(0);
         }
         return null;
+    }
+
+
+    /**
+     * 缓存关注列表
+     * @param follows
+     */
+    public static void insertFollowList(final List<Follow> follows){
+        daoSession.startAsyncSession().runInTx(new Runnable() {
+            @Override
+            public void run() {
+                daoSession.deleteAll(Follow.class);
+                for (Follow follow:follows
+                        ) {
+                    daoSession.getFollowDao().insert(follow);
+                }
+            }
+        });
+    }
+
+    /**
+     * 获取关注列表
+     */
+    public static List<Follow> getFollowList(){
+        return daoSession.getFollowDao().queryBuilder().orderAsc(FollowDao.Properties.Ids).build().list();
     }
 }

@@ -3420,6 +3420,10 @@
         "source": "C:\\Users\\Administrator\\.gradle\\caches\\transforms-1\\files-1.1\\support-compat-27.1.1.aar\\fa2abdefd2134648cc95d18762fa1187\\res\\drawable-hdpi-v4\\notification_bg_low_pressed.9.png"
     },
     {
+        "merged": "E:\\WorkSpace\\cDiving\\RCSticker\\build\\intermediates\\res\\merged\\androidTest\\debug\\drawable-xhdpi-v4_ic_default.jpg.flat",
+        "source": "E:\\WorkSpace\\cDiving\\IMKit\\build\\intermediates\\bundles\\debug\\res\\drawable-xhdpi-v4\\ic_default.jpg"
+    },
+    {
         "merged": "E:\\WorkSpace\\cDiving\\RCSticker\\build\\intermediates\\res\\merged\\androidTest\\debug\\color_abc_tint_seek_thumb.xml.flat",
         "source": "C:\\Users\\Administrator\\.gradle\\caches\\transforms-1\\files-1.1\\appcompat-v7-27.1.1.aar\\b5266c951218018f7487777425b19d3d\\res\\color\\abc_tint_seek_thumb.xml"
     },

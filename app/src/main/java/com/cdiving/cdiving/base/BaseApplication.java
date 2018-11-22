@@ -24,8 +24,10 @@ import com.cdiving.cdiving.im.message.provider.TestMessageProvider;
 import com.cdiving.cdiving.im.server.pinyin.CharacterParser;
 import com.cdiving.cdiving.im.server.utils.NLog;
 import com.cdiving.cdiving.im.server.utils.RongGenerate;
+import com.cdiving.cdiving.im.ui.activity.LoginActivity;
 import com.cdiving.cdiving.im.ui.activity.UserDetailActivity;
 import com.cdiving.cdiving.im.utils.SharedPreferencesContext;
+import com.cdiving.cdiving.utils.ToastUtil;
 import com.facebook.stetho.Stetho;
 import com.pgyersdk.crash.PgyCrashManager;
 
@@ -45,6 +47,8 @@ import io.rong.imkit.RongIM;
 import io.rong.imkit.widget.provider.RealTimeLocationMessageProvider;
 import io.rong.imlib.RongIMClient;
 import io.rong.imlib.ipc.RongExceptionHandler;
+import io.rong.imlib.model.Conversation;
+import io.rong.imlib.model.Message;
 import io.rong.imlib.model.UserInfo;
 import io.rong.push.RongPushClient;
 import io.rong.push.common.RongException;
@@ -62,7 +66,7 @@ public class BaseApplication extends MultiDexApplication {
         return baseApplication;
     }
     private static DisplayImageOptions options;
-
+    private static final String TAG = "BaseApplication";
     @Override
     public void onCreate() {
         super.onCreate();
@@ -131,9 +135,9 @@ public class BaseApplication extends MultiDexApplication {
             });
 
             options = new DisplayImageOptions.Builder()
-                    .showImageForEmptyUri(R.drawable.de_default_portrait)
-                    .showImageOnFail(R.drawable.de_default_portrait)
-                    .showImageOnLoading(R.drawable.de_default_portrait)
+                    .showImageForEmptyUri(R.mipmap.ic_default)
+                    .showImageOnFail(R.mipmap.ic_default)
+                    .showImageOnLoading(R.mipmap.ic_default)
                     .displayer(new FadeInBitmapDisplayer(300))
                     .cacheInMemory(true)
                     .cacheOnDisk(true)

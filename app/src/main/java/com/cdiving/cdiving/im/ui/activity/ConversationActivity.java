@@ -33,6 +33,9 @@ import com.cdiving.cdiving.im.server.utils.NLog;
 import com.cdiving.cdiving.im.server.utils.NToast;
 import com.cdiving.cdiving.im.ui.fragment.ConversationFragmentEx;
 import com.cdiving.cdiving.im.ui.widget.LoadingDialog;
+import com.cdiving.cdiving.ui.DatumActivity;
+import com.cdiving.cdiving.utils.ToastUtil;
+
 import io.rong.callkit.RongCallKit;
 import io.rong.imkit.RongIM;
 import io.rong.imkit.RongKitIntent;
@@ -549,19 +552,23 @@ public class ConversationActivity extends BaseActivity implements View.OnClickLi
             if (mConversationType == Conversation.ConversationType.GROUP) {
                 intent = new Intent(this, GroupDetailActivity.class);
                 intent.putExtra("conversationType", Conversation.ConversationType.GROUP);
+                intent.putExtra("TargetId", mTargetId);
+                startActivityForResult(intent, 500);
             } else if (mConversationType == Conversation.ConversationType.PRIVATE) {
                 intent = new Intent(this, PrivateChatDetailActivity.class);
                 intent.putExtra("conversationType", Conversation.ConversationType.PRIVATE);
+                intent.putExtra("TargetId", mTargetId);
+                DatumActivity.start(this, mTargetId);
             } else if (mConversationType == Conversation.ConversationType.DISCUSSION) {
                 intent = new Intent(this, DiscussionDetailActivity.class);
                 intent.putExtra("TargetId", mTargetId);
                 startActivityForResult(intent, 166);
                 return;
             }
-            intent.putExtra("TargetId", mTargetId);
+           /* intent.putExtra("TargetId", mTargetId);
             if (intent != null) {
                 startActivityForResult(intent, 500);
-            }
+            }*/
 
         }
     }

@@ -2,6 +2,7 @@ package com.cdiving.cdiving.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -15,8 +16,11 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.cdiving.cdiving.R;
 import com.cdiving.cdiving.base.BaseActivity;
+import com.cdiving.cdiving.entity.CompanyInfo;
 import com.cdiving.cdiving.entity.UserInfo;
 import com.cdiving.cdiving.http.RetrofitFactory;
+import com.cdiving.cdiving.im.SealConst;
+import com.cdiving.cdiving.im.SealUserInfoManager;
 import com.cdiving.cdiving.utils.db.DbUtil;
 import com.luck.picture.lib.PictureSelector;
 import com.luck.picture.lib.compress.Luban;
@@ -32,8 +36,11 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import io.rong.imkit.RongIM;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -82,6 +89,7 @@ public class UserCenterActivity extends BaseActivity {
         ButterKnife.bind(this);
         tvTitle.setText(R.string.setting);
         initData();
+        getUserInfo();
     }
 
     private void initData() {
@@ -103,6 +111,42 @@ public class UserCenterActivity extends BaseActivity {
                 .compress(true)
                 .compressGrade(Luban.CUSTOM_GEAR)
                 .forResult(PictureConfig.CHOOSE_REQUEST);
+    }
+
+    private void getUserInfo() {
+        RetrofitFactory.getUserApi()
+                .getUserInfo("showCompanyInfo", "api", "User",
+                        DbUtil.getUserInfo().getOauth_token(), DbUtil.getUserInfo().getOauth_token_secret(),
+                        DbUtil.getUserInfo().getUid())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<CompanyInfo>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                    }
+
+                    @Override
+                    public void onNext(CompanyInfo companyInfo) {
+                        String nickName = companyInfo.getUname();
+                        String portraitUri = companyInfo.getAvatar_middle();
+                        String email = companyInfo.getEmail();
+                        UserInfo userInfo = DbUtil.getUserInfo();
+                        userInfo.setUname(nickName);
+                        userInfo.setEmail(email);
+                        userInfo.setPortrait(portraitUri);
+                        DbUtil.updateUserInfo(userInfo);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
     /**

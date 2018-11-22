@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -14,6 +16,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.GravityEnum;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
@@ -30,6 +35,7 @@ import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.cdiving.cdiving.base.BaseActivity;
 import com.cdiving.cdiving.entity.CompanyAddress;
+import com.cdiving.cdiving.entity.CompanyDetail;
 import com.cdiving.cdiving.entity.CompanyIndexInfo;
 import com.cdiving.cdiving.entity.CompanyInfo;
 import com.cdiving.cdiving.entity.CompanyResult;
@@ -43,22 +49,20 @@ import com.cdiving.cdiving.login.LoginActivity;
 import com.cdiving.cdiving.rongyun.TabActivity;
 import com.cdiving.cdiving.ui.UserCenterActivity;
 import com.cdiving.cdiving.utils.DialogUtil;
+import com.cdiving.cdiving.utils.MobileUtils;
 import com.cdiving.cdiving.utils.ToastUtil;
 import com.cdiving.cdiving.utils.db.DbUtil;
 import com.cdiving.cdiving.views.SlideBottomLayout;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import io.rong.imkit.RongIM;
 import io.rong.imlib.RongIMClient;
@@ -130,6 +134,8 @@ public class MainActivity extends BaseActivity {
 
     private List<CompanyAddress> list;
     private Marker mSelectMarker;
+    private CompanyDetail mSelectDetail;//未登录
+    private CompanyInfo mSelectInfo;//登录
 
     private static final String TAG = "MainActivity";
 
@@ -145,7 +151,7 @@ public class MainActivity extends BaseActivity {
         ButterKnife.bind(this);
         sp = getSharedPreferences("config", MODE_PRIVATE);
         editor = sp.edit();
-        if(!DbUtil.getUserInfo().getIsLogin()){
+        if (!DbUtil.getUserInfo().getIsLogin()) {
             LoginActivity.start(activity);
         }
         getRongYunToken();
@@ -162,22 +168,24 @@ public class MainActivity extends BaseActivity {
             @Override
             public boolean onMarkerClick(Marker marker) {
                 final CompanyAddress companyAddress = (CompanyAddress) marker.getObject();
-                if(mSelectMarker != null){
+                if (mSelectMarker != null) {
                     final CompanyAddress mSelectAddress = (CompanyAddress) mSelectMarker.getObject();
-                    if(!companyAddress.getLatitude().equals(mSelectAddress.getLatitude()) && !companyAddress.getLongitude().equals(mSelectAddress.getLongitude())){
+                    if (!companyAddress.getLatitude().equals(mSelectAddress.getLatitude()) && !companyAddress.getLongitude().equals(mSelectAddress.getLongitude())) {
                         marker.setIcon(createMarkerIconNor(true));
                         mSelectMarker.setIcon(createMarkerIconNor(false));
                     }
-                }else{
+                } else {
                     marker.setIcon(createMarkerIconNor(true));
                 }
                 //                marker.showInfoWindow();
                 mSelectMarker = marker;
                 linTitle.setVisibility(View.GONE);
                 slideLayout.setVisibility(View.VISIBLE);
-                ToastUtil.showLong("" + companyAddress.getUid());
-                getCompanyInfo(companyAddress.getUid());
-
+                if(DbUtil.getUserInfo().getIsLogin()){
+                    getCompanyDetail2(companyAddress.getUid());
+                }else{
+                    getCompanyDetail(companyAddress.getUid());
+                }
                 return true;
             }
         });
@@ -371,6 +379,10 @@ public class MainActivity extends BaseActivity {
     }
 
 
+    /**
+     * 获取个人信息
+     * @param userId
+     */
     private void getUserInfo(final String userId) {
         RetrofitFactory.getUserApi()
                 .getUserInfo("showCompanyInfo", "api", "User",
@@ -449,7 +461,25 @@ public class MainActivity extends BaseActivity {
 
                     @Override
                     public void onError(Throwable e) {
+                        if(DbUtil.getCompanyAddresses() == null){
+                            return;
+                        }
+                        mAMap.clear();
+                        list = new ArrayList<>();
+                        list.addAll(DbUtil.getCompanyAddresses());
+                        for (CompanyAddress address : list) {
+                            MarkerOptions markerOption = new MarkerOptions();
+                            markerOption.position(new LatLng(Double.valueOf(address
+                                    .getLatitude()),
+                                    Double.valueOf(address.getLongitude())));
+                                /*markerOption.title("");
+                                markerOption.anchor(0.5f, 0.81f);//设置锚点
+                                markerOption.infoWindowEnable(false);*/
 
+                            markerOption.icon(createMarkerIconNor(false));
+                            Marker addMarker = mAMap.addMarker(markerOption);
+                            addMarker.setObject(address);
+                        }
                     }
 
                     @Override
@@ -459,7 +489,12 @@ public class MainActivity extends BaseActivity {
                 });
     }
 
-    private void getCompanyInfo(String userId) {
+    /**
+     * 获取公司详情
+     *
+     * @param userId
+     */
+    private void getCompanyDetail(final String userId) {
         RetrofitFactory.getUserApi()
                 .getCompanyInfo(userId)
                 .subscribeOn(Schedulers.io())
@@ -472,10 +507,22 @@ public class MainActivity extends BaseActivity {
                     @Override
                     public void onNext(CompanyIndexInfo companyIndexInfo) {
                         if (companyIndexInfo.getStatus() == 1) {
-                            CompanyIndexInfo.ResultsBean resultsBean = companyIndexInfo.getResults().get(0);
+                            CompanyDetail resultsBean = companyIndexInfo.getResults().get(0);
+                            DbUtil.UpdateCompanyDetail(resultsBean, userId);
+                            mSelectDetail = resultsBean;
                             tvCompanyName.setText(resultsBean.getUname());
-                            tvCompanyMobile.setText(resultsBean.getTel());
-                            tvCompanyEmail.setText(resultsBean.getEmail());
+                            if(resultsBean.getTel().equals(resultsBean.getEmail())){
+                                if(resultsBean.getEmail().contains("@")){
+                                    tvCompanyMobile.setText("");
+                                    tvCompanyEmail.setText(resultsBean.getEmail());
+                                }else{
+                                    tvCompanyMobile.setText(resultsBean.getTel());
+                                    tvCompanyEmail.setText("");
+                                }
+                            }else{
+                                tvCompanyMobile.setText(resultsBean.getTel());
+                                tvCompanyEmail.setText(resultsBean.getEmail());
+                            }
                             tvCompanyAddress.setText(resultsBean.getAddress());
                             tvCompanyWebSite.setText(resultsBean.getWebSite());
                             if (!slideLayout.arriveTop()) {
@@ -487,7 +534,107 @@ public class MainActivity extends BaseActivity {
 
                     @Override
                     public void onError(Throwable e) {
+                        CompanyDetail resultsBean = DbUtil.getCompanyDetail(userId);
+                        if(resultsBean == null){
+                            return;
+                        }
+                        mSelectDetail = resultsBean;
+                        tvCompanyName.setText(resultsBean.getUname());
+                        if(resultsBean.getTel().equals(resultsBean.getEmail())){
+                            if(resultsBean.getEmail().contains("@")){
+                                tvCompanyMobile.setText("");
+                                tvCompanyEmail.setText(resultsBean.getEmail());
+                            }else{
+                                tvCompanyMobile.setText(resultsBean.getTel());
+                                tvCompanyEmail.setText("");
+                            }
+                        }else{
+                            tvCompanyMobile.setText(resultsBean.getTel());
+                            tvCompanyEmail.setText(resultsBean.getEmail());
+                        }
+                        tvCompanyAddress.setText(resultsBean.getAddress());
+                        tvCompanyWebSite.setText(resultsBean.getWebSite());
+                        if (!slideLayout.arriveTop()) {
+                            slideLayout.show();
+                        }
+                    }
 
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+
+    /**
+     * 获取公司详情（已登录情况）
+     * @param userId
+     */
+    private void getCompanyDetail2(final String userId) {
+        RetrofitFactory.getUserApi()
+                .getUserInfo("showCompanyInfo", "api", "User",
+                        DbUtil.getUserInfo().getOauth_token(), DbUtil.getUserInfo().getOauth_token_secret(),
+                        userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<CompanyInfo>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                    }
+
+                    @Override
+                    public void onNext(CompanyInfo companyInfo) {
+                        companyInfo.setIs_follow(companyInfo.getFollow_state().getFollowing());
+                        DbUtil.UpdateCompanyDetail2(companyInfo, userId);
+                        mSelectInfo = companyInfo;
+                        tvCompanyName.setText(companyInfo.getUname());
+                        if(companyInfo.getTel().equals(companyInfo.getEmail())){
+                            if(companyInfo.getEmail().contains("@")){
+                                tvCompanyMobile.setText("");
+                                tvCompanyEmail.setText(companyInfo.getEmail());
+                            }else{
+                                tvCompanyMobile.setText(companyInfo.getTel());
+                                tvCompanyEmail.setText("");
+                            }
+                        }else{
+                            tvCompanyMobile.setText(companyInfo.getTel());
+                            tvCompanyEmail.setText(companyInfo.getEmail());
+                        }
+                        tvCompanyAddress.setText(companyInfo.getAddress());
+                        tvCompanyWebSite.setText(companyInfo.getWebsite());
+                        ivCollection.setImageResource(companyInfo.getIs_follow() == 1 ? R.mipmap.ic_collection_select : R.mipmap.ic_collection_normal);
+                        if (!slideLayout.arriveTop()) {
+                            slideLayout.show();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        CompanyInfo companyInfo = DbUtil.getCompanyDetail2(userId);
+                        if(companyInfo == null){
+                            return;
+                        }
+                        mSelectInfo = companyInfo;
+                        tvCompanyName.setText(companyInfo.getUname());
+                        if(companyInfo.getTel().equals(companyInfo.getEmail())){
+                            if(companyInfo.getEmail().contains("@")){
+                                tvCompanyMobile.setText("");
+                                tvCompanyEmail.setText(companyInfo.getEmail());
+                            }else{
+                                tvCompanyMobile.setText(companyInfo.getTel());
+                                tvCompanyEmail.setText("");
+                            }
+                        }else{
+                            tvCompanyMobile.setText(companyInfo.getTel());
+                            tvCompanyEmail.setText(companyInfo.getEmail());
+                        }
+                        tvCompanyAddress.setText(companyInfo.getAddress());
+                        tvCompanyWebSite.setText(companyInfo.getWebsite());
+                        ivCollection.setBackgroundResource(companyInfo.getIs_follow() == 1 ? R.mipmap.ic_collection_select : R.mipmap.ic_collection_normal);
+                        if (!slideLayout.arriveTop()) {
+                            slideLayout.show();
+                        }
                     }
 
                     @Override
@@ -499,6 +646,7 @@ public class MainActivity extends BaseActivity {
 
     /**
      * Marker图标
+     *
      * @param selector
      * @return
      */
@@ -508,13 +656,13 @@ public class MainActivity extends BaseActivity {
                     (BitmapFactory.decodeResource
                             (getResources(), R
                                     .mipmap
-                                    .ic_location_selector));
+                                    .ic_location_selector2));
         } else {
             return BitmapDescriptorFactory.fromBitmap
                     (BitmapFactory.decodeResource
                             (getResources(), R
                                     .mipmap
-                                    .ic_location_normal));
+                                    .ic_location_normal2));
         }
     }
 
@@ -601,23 +749,189 @@ public class MainActivity extends BaseActivity {
                 startChatOrContact(1);
                 break;
             case R.id.ivCollection:
+                if (DbUtil.getUserInfo().getIsLogin()) {
+
+                } else {
+                    LoginActivity.start(activity);
+                }
                 break;
 
             case R.id.tvCompanyMobile:
-                ToastUtil.showShort("call");
+                showCallDialog();
                 break;
             case R.id.tvCompanyEmail:
-                ToastUtil.showShort("eMail");
+                sendEmail();
                 break;
-
             case R.id.btnChats:
-                final CompanyAddress companyAddress = (CompanyAddress) mSelectMarker.getObject();
-                RongIM.getInstance().startPrivateChat(activity, companyAddress.getUid(), "标题");
+                if (DbUtil.getUserInfo().getIsLogin()) {
+                    if (mSelectInfo != null) {
+                        if (mSelectInfo.getIs_member() == 1) {
+                            final CompanyAddress companyAddress = (CompanyAddress) mSelectMarker.getObject();
+                            RongIM.getInstance().startPrivateChat(activity, companyAddress.getUid(), mSelectInfo.getUname());
+                        } else {
+                            showContactDialog();
+                        }
+                    }
+
+                } else {
+                    LoginActivity.start(activity);
+                }
+
                 break;
             case R.id.tvUserCenter:
-                UserCenterActivity.start(activity);
+                if (DbUtil.getUserInfo().getIsLogin()) {
+                    UserCenterActivity.start(activity);
+                } else {
+                    showLoginDialog();
+                }
                 break;
         }
+    }
+
+    /**
+     * 登录对话框
+     */
+    private void showLoginDialog() {
+        new MaterialDialog
+                .Builder(activity)
+                .titleColor(getResources().getColor(R.color.gray_66))
+                .title(R.string.app_web)
+                .items(R.array.login_tab)
+                .itemsColor(getResources().getColor(R.color.blue))
+                .titleGravity(GravityEnum.CENTER)
+                .itemsGravity(GravityEnum.CENTER)
+                .itemsCallback(new MaterialDialog.ListCallback() {
+                    @Override
+                    public void onSelection(MaterialDialog dialog, View itemView, int position, CharSequence text) {
+                        switch (position) {
+                            case 0:
+                                LoginActivity.start(activity);
+                                break;
+                            case 1:
+                                ToastUtil.showShort("联系我们");
+                                break;
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                })
+                .show();
+    }
+
+    /**
+     * 联系人对话框
+     */
+    private void showContactDialog() {
+        new MaterialDialog
+                .Builder(activity)
+                .title(R.string.contact_title)
+                .items(R.array.contact_tab)
+                .itemsColor(getResources().getColor(R.color.blue))
+                .titleGravity(GravityEnum.CENTER)
+                .itemsGravity(GravityEnum.CENTER)
+                .itemsCallback(new MaterialDialog.ListCallback() {
+                    @Override
+                    public void onSelection(MaterialDialog dialog, View itemView, int position, CharSequence text) {
+                        switch (position) {
+                            case 0:
+                                showCallDialog();
+                                break;
+                            case 1:
+                                sendEmail();
+                                break;
+                            case 2:
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                })
+                .show();
+    }
+
+    /**
+     * 打电话对话框
+     */
+    private void showCallDialog() {
+        if(DbUtil.getUserInfo().getIsLogin()){
+            if (!TextUtils.isEmpty(mSelectInfo.getTel())) {
+                new MaterialDialog
+                        .Builder(activity)
+                        .title(R.string.call)
+                        .inputType(InputType.TYPE_CLASS_PHONE)
+                        .input(getResources().getString(R.string.call_hint), mSelectInfo.getTel(), new MaterialDialog.InputCallback() {
+                            @Override
+                            public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+
+                            }
+                        }).positiveText(R.string.call)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                String phone = dialog.getInputEditText().getText().toString();
+                                if(phone.contains("F")){
+                                    phone = phone.substring(0, phone.indexOf("F"));
+                                }
+                                ToastUtil.showShort(phone);
+                                if (!TextUtils.isEmpty(phone)) {
+                                    MobileUtils.call(activity, phone);
+                                }
+                            }
+                        }).negativeText(R.string.cancel)
+                        .show();
+            }
+        }else{
+            if (!TextUtils.isEmpty(mSelectDetail.getTel())) {
+                new MaterialDialog
+                        .Builder(activity)
+                        .title(R.string.call)
+                        .inputType(InputType.TYPE_CLASS_PHONE)
+                        .input(getResources().getString(R.string.call_hint), mSelectDetail.getTel(), new MaterialDialog.InputCallback() {
+                            @Override
+                            public void onInput(@NonNull MaterialDialog dialog, CharSequence input) {
+
+                            }
+                        }).positiveText(R.string.call)
+                        .onPositive(new MaterialDialog.SingleButtonCallback() {
+                            @Override
+                            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                                String phone = dialog.getInputEditText().getText().toString();
+                                ToastUtil.showShort(phone);
+                                if (!TextUtils.isEmpty(phone)) {
+                                    MobileUtils.call(activity, phone);
+                                }
+                            }
+                        }).negativeText(R.string.cancel)
+                        .show();
+            }
+        }
+
+    }
+
+    /**
+     * 发送邮件
+     */
+    private void sendEmail(){
+        if(DbUtil.getUserInfo().getIsLogin()){
+            if(!TextUtils.isEmpty(mSelectInfo.getEmail())){
+                Uri uri = Uri.parse("mailto:" + mSelectInfo.getEmail());
+                Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
+                intent.putExtra(Intent.EXTRA_SUBJECT, "cdiving"); // 主题
+                intent.putExtra(Intent.EXTRA_TEXT, "cdiving"); // 正文
+                startActivity(Intent.createChooser(intent, "请选择邮件类应用"));
+            }
+        }else{
+            if(!TextUtils.isEmpty(mSelectDetail.getEmail())){
+                Uri uri = Uri.parse("mailto:" + mSelectDetail.getEmail());
+                Intent intent = new Intent(Intent.ACTION_SENDTO, uri);
+                intent.putExtra(Intent.EXTRA_SUBJECT, "cdiving"); // 主题
+                intent.putExtra(Intent.EXTRA_TEXT, "cdiving"); // 正文
+                startActivity(Intent.createChooser(intent, "请选择邮件类应用"));
+            }
+        }
+
     }
 
     private void startChatOrContact(int type) {
